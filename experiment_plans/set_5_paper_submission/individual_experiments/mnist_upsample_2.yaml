@@ -1,0 +1,42 @@
+resources:
+  gpu: true
+
+data:
+  data_name: mnist
+  n: 70000
+  n_public: 9000
+  n_test: 1000
+
+models:
+  architecture: VGG7
+  lr: 0.001
+  student_epochs: 200
+  teacher_epochs: 60
+  weight_decay: 5.0e-05
+
+pate:
+  aggregators: [confident]
+  budgets:
+    uGNMax: # upsampling
+    - [1.0, 2. , 3.]
+  deltas: [1.0e-05]
+  distributions:
+  - 0: [0.34, 0.43, 0.23]
+    1: [0.34, 0.43, 0.23]
+    2: [0.34, 0.43, 0.23]
+    3: [0.34, 0.43, 0.23]
+    4: [0.34, 0.43, 0.23]
+    5: [0.34, 0.43, 0.23]
+    6: [0.34, 0.43, 0.23]
+    7: [0.34, 0.43, 0.23]
+    8: [0.34, 0.43, 0.23]
+    9: [0.34, 0.43, 0.23]     
+  limits: [budgets]
+  n_labels: 2000
+  nums_teachers: [250]
+  precision: 0.01
+  seeds: [9]
+  seeds2: [0, 1, 2, 3, 4]
+  sigmas: [40]
+  sigmas1: [150]
+  ts: [200]

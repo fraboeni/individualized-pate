@@ -1,0 +1,35 @@
+resources:
+  gpu: true
+
+data:
+  data_name: cifar10
+  n: 60_000
+  n_test: 1_000
+  n_public: 2_000
+
+models:
+  architecture: VGG5 # also chosen for capc paper
+  teacher_epochs: 200
+  student_epochs: 200
+  lr: 0.005
+  weight_decay: 0.00005
+
+pate:
+  aggregators: ['confident']
+  budgets: {
+    'GNMax': [[8,]],
+  }
+  deltas: [0.00001]
+  distributions: [
+    {0: [1], 1: [1], 2: [1], 3: [1], 4: [1], 5: [1], 6: [1], 7: [1], 8: [1], 9: [1]},
+  ]
+  limits: ['budgets']
+  n_labels: 500
+  nums_teachers: [50]
+  precision: 0.01
+  seeds: [9]
+  seeds2: [0, 1, 2, 3, 4]
+  sigmas: [7] # from capc paper
+  sigmas1: [26] # scaled to fit sigma
+  ts: [35] # from capc paper
+

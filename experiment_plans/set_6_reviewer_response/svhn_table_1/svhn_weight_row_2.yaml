@@ -1,0 +1,43 @@
+resources:
+  gpu: true
+
+data:
+  data_name: svhn
+  n: 99289
+  n_public: 10000
+  n_test: 26032
+
+models:
+  architecture: VGG7
+  lr: 0.001
+  student_epochs: 2
+  teacher_epochs: 60
+  weight_decay: 5.0e-05
+
+pate:
+  aggregators: [confident]
+  budgets:
+    wGNMax: # regular
+      - [1., 2., 3.0]
+
+  deltas: [1.0e-05]
+  distributions:
+    - 0: [0.54, 0.37, 0.09]
+      1: [0.54, 0.37, 0.09]
+      2: [0.54, 0.37, 0.09]
+      3: [0.54, 0.37, 0.09]
+      4: [0.54, 0.37, 0.09]
+      5: [0.54, 0.37, 0.09]
+      6: [0.54, 0.37, 0.09]
+      7: [0.54, 0.37, 0.09]
+      8: [0.54, 0.37, 0.09]
+      9: [0.54, 0.37, 0.09]
+  limits: [budgets]
+  n_labels: 2000
+  nums_teachers: [250]
+  precision: 0.01
+  seeds: [9]
+  seeds2: [0, 1, 2]
+  sigmas: [40]
+  sigmas1: [150]
+  ts: [200]

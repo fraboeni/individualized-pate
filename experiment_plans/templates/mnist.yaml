@@ -1,0 +1,35 @@
+resources:
+    gpu: true
+
+data:
+    data_name: 'mnist'
+    n: 70_000                          # number of data points in the MNIST dataset
+    n_test: 1_000                      # ratio of test part of the MNIST dataset
+    n_public: 2_000                    # ratio of public part of the MNIST dataset
+
+models:
+    architecture: VGG7
+    teacher_epochs: 200
+    student_epochs: 200
+    lr: 0.005
+    weight_decay: 0.00005
+
+pate:
+    seeds: [9]                     # seeds to determine pseudo-randomness for the PATE pipelines
+    seeds2: [0, 1, 2, 3, 4]        # seeds to determine the shuffling of public data before voting
+    nums_teachers: [250]           # numbers of teachers used for the PATE pipelines
+    sigmas: [40]                   # scales of noise induced in each voting
+    sigmas1: [150]                 # scales of noise used in confident-GNMax to check if teachers consent
+    ts: [200]                      # thresholds for confident-GNMax to check if teachers consent
+    deltas: [0.00001]              # precisions of DP guarantees
+    aggregators: ['confident']     # aggregators to use in PATE pipelines
+    budgets: {                     # collectors to use in PATE pipelines and privacy personalizations
+        'GNMax': [[1,]],            # baselines (non-personalized)
+    }
+    n_labels: 2_000                # number of labels to be produced by PATE
+    limits: ['budgets']            # limits that specify the number of labels used for students
+
+    distributions: [               # distributions of DP budgets in the private data
+        {0: [1], 1: [1], 2: [1], 3: [1], 4: [1], 5: [1], 6: [1], 7: [1], 8: [1], 9: [1]},
+    ]
+    precision: 0.01
