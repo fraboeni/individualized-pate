@@ -1,35 +1,42 @@
 # A Framework to Implement and Experiment with personalized PATE
 
 Private Aggregation of Teacher Ensembles (PATE) provides the protection and
-accounting of privacy within machine learning (see "Semi-Supervised Knowledge
-Transfer for Deep Learning from Private Training Data", and "Scalable Private
-Learning with PATE", both from Papernot et al.).
+accounting of privacy within machine learning (see "Semi-Supervised Knowledge Transfer for Deep Learning from Private Training Data", and "Scalable Private Learning with PATE", both from Papernot et al.).
 
-This repository provides an implementation of PATE, as well as extensions of it
-to enable the personalization of privacy preservation, and a framework for
-experimentation. The code is designed in an object-oriented manner.
+This repository provides an implementation of PATE, as well as extensions of it to enable the personalization of privacy preservation, and a framework for experimentation. The code is designed in an object-oriented manner.
 
-## Usage
-
+## Development and Usage
+This codebase uses `python3.9`. 
 ### Installation
-- Create a virtual environment
-  ```bash
-  virtualenv -p python3.9 venv
-  ```
-- Source this environment
-  ```bash
-  source venv/bin/activate
-  ```
-- Install per-point-pate package (editable install for convenience)
-  ```
-  pip install -e personalized-pate/per-point-pate
-  ```
-  This installs scripts for executing per-point-pate with various datasets.
+This library is developed using [Poetry](https://python-poetry.org/), evidenced by the `pyproject.toml`. However, it can be installed either through Poetry or with `pip` + your favorite virtual environment.
+
+#### Installation Using a Virtual Environment [Tested and Supported]
+1. Create a virtual environment `python3.9 -m venv venv`
+2. Source this environment `source venv/bin/activate`
+3. From the base of the codebase, run `pip install -e .`   
+
+#### Installation Using Poetry [Not supported by authors]
+While `poetry` (version 1.2.1) is used to manage the dependencies, and the authors use poetry, tests are run using `venv` and so the authors only commit to supporting installation using `virtualenv` or `venv`
+
+1. Install Poetry version 1.2.1 (`curl -sSL https://install.python-poetry.org | python3 -`)
+2. Navigate to the base of the codebase.
+3. Run `poetry shell`
+4. Run `poetry install`
+
+
+
+Both of these methods for installation installs scripts for executing `individualized-pate` with various datasets, and puts them on your `PYTHONPATH`. Running `poetry shell` or `source venv/bin/activate` will shell into the virtual environments with the code installed, and will allow you to run the executables directly.
+### Testing
+Simply run 
+```bash
+pytest tests/ -v
+```
 
 ### Execution
 - Create an experiment plan according to the data class `ExperimentPlan`
-  or use the ones from `personalized_pate/per-point-pate/experiment_plans`.
+  or use the ones from `individualized_pate/individualized-pate/experiment_plans`.
 
+- 
 - To run a single Experiment plan, execute the following:
   ```bash
   ppp-run --params_path path/to/experiment_plan.yaml --data_dir path/to/data --out_dir path/to/output_dir
@@ -41,8 +48,9 @@ experimentation. The code is designed in an object-oriented manner.
   This assumes that the folder `path/to/data` contains the necessary files for the dataset specified in `experiment_plan.yaml`.
 
 ### Usage on Slurm Cluster
-- On a cluster that manages resources with slurm it is necessary to create a "job-script"
-  that wraps the scripts from per-point-pate. See example below:
+- On a cluster that manages resources with slurm it is necessary to create a "job-script" that wraps the scripts from `individualized-pate`. See example below:
+
+Note: Do this after downloading the code, and installing the codebase in a virtualenvironment, that can be sourced from the slurm-script.
   ```bash
   #!/usr/bin/env bash
 
@@ -61,7 +69,7 @@ experimentation. The code is designed in an object-oriented manner.
   module load Python/3.9.5-GCCcore-10.3.0
   module load CUDA/11.3.1
   module load cuDNN/8.2.1.32-CUDA-11.3.1
-
+  source /path/to/venv/bin/activate # source the virtualenvironment that had previously been set up.
   ppp-run -c $1 -d $2 -o $3
   ```
 - The above job-script wraps the pate_mnist script and is executed with sbatch:
@@ -70,12 +78,51 @@ experimentation. The code is designed in an object-oriented manner.
   ```
 
 ### Creating a new ExperimentPlan
-- Some experiment plans are available under `personalized_pate/per-point-pate/experiment_plans`.
+- Some experiment plans are available under `experiment_plans`.
 - To create a new experiment plan, it is advised to start from one of these as a template.
-- The documentation found under `personalized_pate/per-point-pate/per_point_pate/studies/parameters.py` gives specific details on the different parameters.
+- The documentation found under `individualized-pate/individualized_pate/studies/parameters.py` gives specific details on the different parameters.
 
 ## Architecture
 **TODO:** Nomenclature and folder structure needs to be fixed.
+
+## Code Structure
+```
+├── assets
+│   └─ ...
+├── CHANGELOG.md
+├── experiment_plans
+│   ├── paper_experiments
+│   │   ├── <Experiment plan yamls and scripts>
+├── individualized_pate
+│   ├── data
+│   │   └── <Code for the generation and management of data>
+│   ├── experiments
+│   │   ├── Libraries for wrappers for the Individualize-PATE experiments
+│   │   └── pytorch # 
+│   │       └── libraries for training teachers and students in pytorch
+│   ├── hprms_search.py
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models
+│   │   ├── classifiers.py
+│   │   ├── __init__.py
+│   │   └── pytorch
+│   │       └── Libraries for training models with different architectures
+│   ├── privacy
+│   │   └── General privacy accounting and management, in general and for PATE 
+│   ├── studies
+│   │   ├── Code for the running of training multiple students and teachers (calls `experiments.pytorch`)
+│   │   ├── train_students.py
+│   └── └── train_teachers.py
+├── notebooks
+│   └── <Notebooks for the analysis and plot generation of MNIST and Adult results> 
+│       
+├── poetry.lock
+├── pyproject.toml
+├── README.md
+└── tests
+    └── <tests>
+```
 
 ### Experiments, Plans and Sets
 - An **ExperimentPlan** specifies multiple of Experiments over multiple seeds,
@@ -178,27 +225,27 @@ is duplicated according to its budget and randomly given to different teachers.
 The improved method implemented [here](https://github.com/cleverhans-lab/capc-iclr/blob/fe9d3530929ed4a13cbf6cf0c1d35cf55dfc8de3/learning/analysis/pate.py#L64) should give considerably better results.
 
 ### Adding Datasets
-* For adding a dataset, a method to load said dataset should be implemented under `per-point-pate/per_point_pate/data/load_datasets.py`.
+* For adding a dataset, a method to load said dataset should be implemented under `individualized-pate/individualized_pate/data/load_datasets.py`.
 * Subsequently, `data_augmentation.py` and `data_factory.py` in the same folder should be extended.
 
 ### Adding models
-* Add code for the models under `per-point-pate/per_point_pate/models`.
+* Add code for the models under `individualized-pate/individualized_pate/models`.
 * Make the model inherit the `Classifier` class (or have some wrapper).
-* The substeps of the PATE pipeline steps (found in `per-point-pate/per_point_pate/experiments`) partially hard-code which model to use. The `architecture` parameter is passed to select from implementations.
+* The substeps of the PATE pipeline steps (found in `individualized-pate/individualized_patelized_patelized_patelized_pate/experiments`) partially hard-code which model to use. The `architecture` parameter is passed to select from implementations.
 
 ### Reorganizing folder structure:
-* What is denoted by one Experiment grew organically and should be fixed. As is, an ExperimentPlan specifies multiple Experiments which each is one execution of the PATE pipeline. The folder `per-point-pate/per_point_pate/experiments` instead contains code that specifies substeps executed during the steps teacher training, voting and student training.
-* Executing an ExperimentPlan was formally called running a study, therefore the historical name of `per-point-pate/per_point_pate/studies`. This should be renamed.
+* What is denoted by one Experiment grew organically and should be fixed. As is, an ExperimentPlan specifies multiple Experiments which each is one execution of the PATE pipeline. The folder `individualized-pate/individualized_pate/experiments` instead contains code that specifies substeps executed during the steps teacher training, voting and student training.
+* Executing an ExperimentPlan was formally called running a study, therefore the historical name of `individualized-pate/individualized_pate/studies`. This should be renamed.
 
 ### Reducing complexity
 * One of the main problems of the current framework is high complexity in terms of dependencies of the single components as well as usage. Below are several proposed steps to reduce this compexity.
 * Simplify ExperimentPlan
   * One ExperimentPlan allows to specify different aggregators. This should be removed for simplicity.
   * The ExperimentPlan allows to specify different teacher numbers, noise scales and other PATE parameters. This should be removed for simplicity.
-* Clarify the structure of higher level pate steps (found in `per-point-pate/per_point_pate/study`) and the respective substeps (found in `per-point-pate/per_point_pate/experiments`).
-* The `ExperimentPlan` (found in `per-point-pate/per_point_pate/study/parameters.py`) class was introduced to have one location for all parameters and derived properties. This could be followed up by unifying logging, still spread over multiple locations (higher level steps of PATE pipeline and the respective substeps).
+* Clarify the structure of higher level pate steps (found in `individualized-pate/individualized_pate/study`) and the respective substeps (found in `individualized-pate/individualized_pate/experiments`).
+* The `ExperimentPlan` (found in `individualized-pate/individualized_pate/study/parameters.py`) class was introduced to have one location for all parameters and derived properties. This could be followed up by unifying logging, still spread over multiple locations (higher level steps of PATE pipeline and the respective substeps).
 * Code for selecting and training a model is currently distributed over multiple locations:
-  * `archiecture` parameter.
-  * The substeps of the PATE pipeline `per-point-pate/per_point_pate/experiments`
+  * `architecture` parameter.
+  * The substeps of the PATE pipeline `individualized-pate/individualized_pate/experiments`
   * The `Classifier` class again specifies train, eval etc. methods for the specific models.
   * These many levels of abstraction come with high complexity that could be reduced.
